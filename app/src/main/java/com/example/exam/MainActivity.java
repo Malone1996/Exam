@@ -15,7 +15,7 @@ import java.io.OutputStream;
 
 public class MainActivity extends AppCompatActivity {
 //    private Button mBtn;
-    private Button mBtnList;
+    private Button mBtnList,mBtnFavorite;
 
 
     @Override
@@ -69,6 +69,15 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent=new Intent(MainActivity.this, ListActivity.class);
                 startActivity(intent);
 
+            }
+        });
+
+        mBtnFavorite=findViewById(R.id.btn_favorite);
+        mBtnFavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(MainActivity.this,FavoriteActivity.class);
+                startActivity(intent);
             }
         });
 

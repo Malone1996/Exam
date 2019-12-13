@@ -76,7 +76,7 @@
         <Button
             android:visibility="visible"
             android:layout_weight="1"
-            android:text="首题"
+            android:text="上一题"
             android:id="@+id/btn_previous"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -88,13 +88,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <Button
-            android:visibility="visible"
-            android:text="收藏"
-            android:id="@+id/btn_star"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
 
     </LinearLayout>
 

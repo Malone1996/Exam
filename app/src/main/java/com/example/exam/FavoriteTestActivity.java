@@ -1,8 +1,5 @@
 package com.example.exam;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -19,15 +16,14 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.appcompat.app.AlertDialog;
+
 /**
  *
  */
-public class TestActivity extends Activity {
+public class FavoriteTestActivity extends Activity {
     private int count;
     private int current;//当前显示的题目
-    private int state;//刷新前所处id
-
-    private Button btn_star;
     private boolean wrongMode;
     private DBservice dbService;
     private RadioGroup radioGroup;
@@ -51,16 +47,15 @@ public class TestActivity extends Activity {
         String itemname=bundle.getString("FromTag");
 //        Toast.makeText(this,itemname,Toast.LENGTH_SHORT).show();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_test);
+        setContentView(R.layout.activity_favorite_test);
 
         dbService=new DBservice();
-        list=dbService.getQuestions(itemname);
+        list=dbService.getFavoriteQuestions(itemname);
 
 
         count=list.size();
 
         current=0;
-        state=0;
         wrongMode=false;
 
         tv_question=findViewById(R.id.question);
@@ -73,7 +68,6 @@ public class TestActivity extends Activity {
 
         final Button btn_next=findViewById(R.id.btn_next);
         btn_previous=findViewById(R.id.btn_previous);
-        btn_star=findViewById(R.id.btn_star);
 
         tv_explaination=findViewById(R.id.explaination);
         radioGroup=findViewById(R.id.radioGroup);
@@ -89,13 +83,11 @@ public class TestActivity extends Activity {
 
 
 //            btn_star.setText(q.star);
-            btn_star.setText(starStrProcess(q));
-            savaStar(q);
         }catch (IndexOutOfBoundsException e){
 //            Intent intent=new Intent(ExamActivity.this,InfoActivity.class);
 //            startActivity(intent);
 
-            String ToastStr="<font color='#f0134d'>"+"空数据异常，请返回！！！"+"</font>";
+            String ToastStr="<font color='#f0134d'>"+"该目录下暂时未收藏数据，请返回！！！"+"</font>";
             Toast toast = Toast.makeText(this, Html.fromHtml(ToastStr),Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
@@ -107,9 +99,6 @@ public class TestActivity extends Activity {
 
 
         }
-
-
-
 
 
         btn_next.setOnClickListener(new View.OnClickListener() {
@@ -126,8 +115,7 @@ public class TestActivity extends Activity {
                     tv_explaination.setText(q.explaination);
 
 //                    btn_star.setText(q.star);
-                    btn_star.setText(starStrProcess(q));
-                    savaStar(q);
+
 
 
                     radioGroup.clearCheck();
@@ -137,13 +125,13 @@ public class TestActivity extends Activity {
                 }
                 else if(current == count - 1 && wrongMode == true)
                 {
-                    new AlertDialog.Builder(TestActivity.this)
+                    new AlertDialog.Builder(FavoriteTestActivity.this)
                             .setTitle("提示")
                             .setMessage("已经到达最后一题，是否退出？")
                             .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    TestActivity.this.finish();
+                                    FavoriteTestActivity.this.finish();
                                 }
                             })
                             .setNegativeButton("取消", null)
@@ -154,18 +142,18 @@ public class TestActivity extends Activity {
                     final List<Integer> wrongList = checkAnswer(list);
                     if(wrongList.size() == 0)
                     {
-                        new AlertDialog.Builder(TestActivity.this)
+                        new AlertDialog.Builder(FavoriteTestActivity.this)
                                 .setTitle("提示")
                                 .setMessage("恭喜你全部回答正确！")
                                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        TestActivity.this.finish();
+                                        FavoriteTestActivity.this.finish();
                                     }
                                 })
                                 .show();
                     }else {
-                        new AlertDialog.Builder(TestActivity.this)
+                        new AlertDialog.Builder(FavoriteTestActivity.this)
                                 .setTitle("提示")
                                 .setMessage("您答对了" + (list.size() - wrongList.size()) +
                                         "道题目，答错了" + wrongList.size() + "道题目。是否查看错题？")
@@ -198,7 +186,7 @@ public class TestActivity extends Activity {
                                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                       TestActivity.this.finish();
+                                       FavoriteTestActivity.this.finish();
                                     }
                                 })
                                 .show();
@@ -223,11 +211,6 @@ public class TestActivity extends Activity {
                     tv_explaination.setText(q.explaination);
 
 //                    btn_star.setText(q.star);
-                    btn_star.setText(starStrProcess(q));
-                    savaStar(q);
-//                    updateStar(q);
-                    state=current;
-                    refresh();
 
                     radioGroup.clearCheck();
                     if (q.selectedAnswer != -1) {
@@ -252,53 +235,6 @@ public class TestActivity extends Activity {
         });
     }
 
-
-    //activity的刷新，注意调用此方法要继承Activity，而不能继承AppCompatActivity
-    public void refresh() {
-        onCreate(null);
-    }
-
-
-    private String starStrProcess(Question question){
-        String q_star=question.star;
-        if (q_star.equals("未收藏")){
-            q_star="收藏";
-        }else {
-            q_star="取消收藏";
-        }
-        return q_star;
-    }
-
-    /**
-     * 收藏功能
-     * @param question 待收藏的question
-     */
-    private void savaStar(final Question question){
-        btn_star.setOnClickListener(new View.OnClickListener() {
-            private static final String TAG ="star_info";
-
-            @Override
-            public void onClick(View v) {
-                String text=btn_star.getText().toString();
-
-                int current_id=question.ID;
-                if (text.equals("收藏")){
-
-//                    btn_star.setText(is_star);
-                    dbService.updataStar(current_id);
-//                    finish();
-
-                    Log.d(TAG,current_id+""+"收藏成功！");
-                    btn_star.setText("取消收藏");
-
-                }else {
-                    dbService.updataCancelStar(current_id);
-                    Log.d(TAG,current_id+""+"取消收藏成功！");
-                    btn_star.setText("收藏");
-                }
-            }
-        });
-    }
 
     //该方法用来保存回答错误的题目的下标
     private List<Integer> checkAnswer(List<Question> list)

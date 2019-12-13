@@ -10,6 +10,8 @@ public class Question {
     public String explaination;
     public int ID;
     public String unit;//保存题目所属章节
+    public String star;
+
 
     public int selectedAnswer;//用来保存用户选择的答案
 
